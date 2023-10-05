@@ -1,21 +1,26 @@
 pipeline {
     agent any
+    environment {
+        DOCKER_REGISTRY_CREDENTIALS = credentials('docker') // Specify your Docker Hub credentials ID here
+        DOCKER_IMAGE_NAME = 'jenkins'
+    }
     stages {
         stage('Create Docker Image') {
             steps {
-                sh '''
-                withDockerRegistry([ credentialsId: "docker", url: "" ])
-                if [ "$(docker images -q jenkins)" ]; then
-                    docker rmi -f Jenkins
-                fi
-                sudo docker build -t jenkins -f Dockerfile .
-                sudo docker push jenkins
-                '''
+                script {
+                    if (docker.image(DOCKER_IMAGE_NAME).exists()) {
+                        docker.image(DOCKER_IMAGE_NAME).remove()
+                    }
+                    docker.build(DOCKER_IMAGE_NAME, '-f Dockerfile .')
+                    docker.withRegistry('', DOCKER_REGISTRY_CREDENTIALS) {
+                        docker.image(DOCKER_IMAGE_NAME).push()
+                    }
+                }
             }
         }
         stage('Deploy') {
             steps {
-                sh 'sudo docker run -d -p 8095:8080 Jenkins'
+                sh 'docker run -d -p 8095:8080 jenkins'
             }
         }
     }
