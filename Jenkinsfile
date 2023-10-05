@@ -4,6 +4,7 @@ pipeline {
         stage('Create Docker Image') {
             steps {
                 sh '''
+                withDockerRegistry([ credentialsId: "docker", url: "" ])
                 if [ "$(docker images -q jenkins)" ]; then
                     docker rmi -f Jenkins
                 fi
