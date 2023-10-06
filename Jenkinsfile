@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        DOCKER_REGISTRY_CREDENTIALS = credentials('Docker') // Specify your Docker Hub credentials ID here
+        DOCKER_REGISTRY_CREDENTIALS = credentials('project') // Specify your Docker Hub credentials ID here
         DOCKER_IMAGE_NAME = 'jenkins'
     }
     stages {
